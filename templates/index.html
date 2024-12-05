@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Aplikasi Prediksi Kode KBLI</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .content {
+            flex: 1;
+        }
+        .high-probability {
+            background-color: #d4edda;  /* Light green */
+            color: #155724;  /* Dark green */
+        }
+        .medium-probability {
+            background-color: #fff3cd;  /* Light orange */
+            color: #856404;  /* Dark orange */
+        }
+        .low-probability {
+            background-color: #f8d7da;  /* Light red */
+            color: #721c24;  /* Dark red */
+        }
+        footer {
+            text-align: center;
+            padding: 12px 0;
+            background-color: #343a40;
+            color: #ffffff;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+        footer p {
+            margin: 0;
+        }
+        footer a {
+            color: #ffc107;
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="content container">
+    <center><h2 class="mt-5">Pusing nentuin kode KBLI? 😆</h2></center>
+    <form id="descriptionForm">
+        <div class="form-group">
+            <textarea class="form-control" id="description" name="description" rows="5" placeholder="Masukan Deskripsi Pekerjaan"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Kirim</button>
+    </form>
+    <h2 class="mt-5">Hasil Prediksi KBLI</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>KBLI</th>
+                <th>Judul KBLI</th>
+                <th>Uraian KBLI</th>
+                <th>Probability</th>
+            </tr>
+        </thead>
+        <tbody id="result">
+        </tbody>
+    </table>
+</div>
+<footer>
+    <p>Powered by <a href="#">ISDL BPS Kabupaten Melawi</a></p>
+</footer>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#descriptionForm').on('submit', function(event) {
+            event.preventDefault();
+            $.ajax({
+                url: '/predict',
+                method: 'POST',
+                data: { description: $('#description').val() },
+                success: function(response) {
+                    $('#result').empty();
+                    response.top_data.forEach(function(data, index) {
+                        var probability = response.top_probabilities[index];
+                        var probClass = '';
+                        if (probability > 0.7) {
+                            probClass = 'high-probability';
+                        } else if (probability >= 0.4) {
+                            probClass = 'medium-probability';
+                        } else {
+                            probClass = 'low-probability';
+                        }
+
+                        $('#result').append(
+                            '<tr class="' + probClass + '"><td>' + data[0] + '</td><td>' + data[1] + '</td><td>' + data[2] + '</td><td>' + probability.toFixed(2) + '</td></tr>'
+                        );
+                    });
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>
